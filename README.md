@@ -66,7 +66,11 @@ To detect the vehicles, first I scan and define all possible windows of size (60
 
 ### Searching windows
 
-In this step, I resize each window into (64, 64) window, extract their features (as described above), and scale the feature vector using the scaler obtained when building the model. Then, I predict whether this feature belong to the image of a car. If yes, this window is shortlisted for the further analyses.
+In this step, I resize each window into (64, 64) window, extract their features (as described above), and scale the feature vector using the scaler obtained when building the model. Then, I predict whether this feature belong to the image of a car. If yes, this window is shortlisted for the further analyses. This step is performed by `search_windows` function in `functDetect.py`.
+
+The shortlisted windows in one of the test images is shown bellow:
+
+![windows](https://github.com/hanieh-hassanzadeh/Vehicle-detection-and-tracking/blob/master/outputImages/test5_all_windows.jpg)
 
 
 ### Removing false positive windows
@@ -74,6 +78,10 @@ In this step, I resize each window into (64, 64) window, extract their features 
 To remove the false positive windows, I performed three steps. First, I define the hot spots as pixels which are included in more than some threshold number windows shortlisted. Then, I distinguish the location of the possible vehicles (windows) by `scipy.ndimage.measurements.labels` function. Second, I neglect the final window which are smaller than 1500 pixels. The third step is only applied for the vide frames. In this step, I consider the detected windows from two consequent frames to find the hot spots. This method highlights the vehicles location, and reduces the number of false positives dramatically. These steps are coded in `draw_labeled_bboxes`, `heatmapped`, and `add_heat` functions in `functDetect.py`, as well as the `find_car` class in `main.py`.
 
 Finally, I draw boxes around the remaining windows. 
+
+The following image demonstrates how many of false positive windows windows are removed using these steps.
+
+![final](https://github.com/hanieh-hassanzadeh/Vehicle-detection-and-tracking/blob/master/outputImages/test5.jpg)
 
 ## Final video
 
