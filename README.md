@@ -91,17 +91,17 @@ The following image demonstrates how many of false positive windows windows are 
 
  - The most challenging issue I face here is the time needed to process the whole video. I believe, I should work on my methods to speed up the detection process. This may cause some realtime application on a real autonomous car on the road.
 
-My potential solution: 
-  1. Improve the model.
-  2. predict the location of the cars using the data from previous frame, and search only a small subdomain for the vehicles.
-  3. Use deep learning classifies, where helpful.
+ My potential solution: 
+   1. Improve the model.
+   2. predict the location of the cars using the data from previous frame, and search only a small subdomain for the vehicles.
+   3. Use deep learning classifies, where helpful.
   
 - The second challenge is detecting black cars when they have shadow.
 
-My potential solution: 
- Introduce more images from black cars to input images
+ My potential solution: 
+  Introduce more images from black cars to input images
 
 - Another potential challenge could be that there are some road-vehicles in different countries which are not introduced to the model. Therefore, the model may fail facing such vehicles.
 
-My potential solution: 
-  Introduce more input images from diverse vehicles from all over the world.
+ My potential solution: 
+   Introduce more input images from diverse vehicles from all over the world.
