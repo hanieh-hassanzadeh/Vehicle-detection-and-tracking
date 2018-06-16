@@ -85,7 +85,7 @@ The following image demonstrates how many of false positive windows windows are 
 
 ## Final video
 
-[Here](https://github.com/hanieh-hassanzadeh/Advanced-Lane-Finder/blob/master/outputvideo/project_video_annotated.mp4) is a link to the final annotated video.
+[Here](https://github.com/hanieh-hassanzadeh/Vehicle-detection-and-tracking/blob/master/outputvideo/project_video_annotated.mp4) is a link to the final annotated video.
 
 ## Discussion
 
@@ -94,8 +94,12 @@ The following image demonstrates how many of false positive windows windows are 
 My potential solution: 
   1. Improve the model.
   2. predict the location of the cars using the data from previous frame, and search only a small subdomain for the vehicles.
-  3. Use deep learning classifies, where helpful
+  3. Use deep learning classifies, where helpful.
+  
+- The second challenge is detecting black cars when they have shadow.
 
+My potential solution: 
+ Introduce more images from black cars to input images
 
 - Another potential challenge could be that there are some road-vehicles in different countries which are not introduced to the model. Therefore, the model may fail facing such vehicles.
 
