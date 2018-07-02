@@ -16,7 +16,7 @@ color_space = 'LUV'  (Can be RGB, HSV, LUV, HLS, YUV, YCrCb)
 
 orient = 11   (HOG orientations)
 
-pix_per_cell = 8  (HOG pixels per cell)
+pix_per_cell = 16  (HOG pixels per cell)
 
 cell_per_block = 2  (HOG cells per block)
 
@@ -75,9 +75,35 @@ The shortlisted windows in one of the test images is shown bellow:
 
 ### Removing false positive windows
 
-To remove the false positive windows, I performed three steps. First, I define the hot spots as pixels which are included in more than some threshold number windows shortlisted. Then, I distinguish the location of the possible vehicles (windows) by `scipy.ndimage.measurements.labels` function. Second, I neglect the final window which are smaller than 1500 pixels. The third step is only applied for the vide frames. In this step, I consider the detected windows from two consequent frames to find the hot spots. This method highlights the vehicles location, and reduces the number of false positives dramatically. These steps are coded in `draw_labeled_bboxes`, `heatmapped`, and `add_heat` functions in `functDetect.py`, as well as the `find_car` class in `main.py`.
+To remove the false positive windows, I performed several steps. 
 
-Finally, I draw boxes around the remaining windows. 
+First, I did hard negative mining; meaning that I added some of false positive windows of the video frames to the non-car dataset. 
+
+`hardAugNonCar   = glob.glob('../data/nonV_from_video/*')`
+
+Second, I defined the hot spots as pixels which are included in more than some threshold number windows shortlisted. Then, I distinguish the location of the possible vehicles (windows) by `scipy.ndimage.measurements.labels` function. 
+
+Third, I neglect the final window which are smaller than 1500 pixels. 
+
+Fourth, I only considered the detected windows which satisfy `clf.decision_function(test_features)[0] < 2`. 
+
+Fifth, I consider the detected windows from twenty two consequent frames to find the hot spots. This method highlights the vehicles location, and reduces the number of false positives dramatically. These steps are coded in `draw_labeled_bboxes`, `heatmapped`, and `add_heat` functions in `functDetect.py`, as well as the `find_car` class in `main.py`.
+
+Sixth, I adjusted the borders of the window-search area, acording to the posibility of a car could axist in that area in a specific size.
+
+However, these steps caused no detected car in some frames. To overcome this problem, I lowered the threshold one by one untill cars could be identified (if they really existed). I achived this by:
+
+```
+while True:
+         heatmap_dum = heatmap
+         heatmap_dum[heatmap < threshold] = 0
+         labels = label(heatmap_dum)     # number of object found
+         if labels[1]<2 and threshold >2:
+             threshold = threshold -1
+         else:
+             break
+```
+Finally, I drew boxes around the remaining windows. 
 
 The following image demonstrates how many of false positive windows windows are removed using these steps.
 
