@@ -4,7 +4,7 @@ The goal of this project is to detect and track the vehicles on the road, using 
 To achieve this goal, I split the project into two parts. In the first part, I train a model to identify the vehicle images from non-vehicle images (`model.py`). In the second part, I analyze the single images or the video frames to detect any vehicles on the image using the trained model (`main.py`).
 
 ## Building the model
-To build the model, I first extract features of the input images to feed into the model. The input images are located in the `data` folder (is not included here, due to the limitation for the number of files), which includes series of 8792 vehicle and 8968 non-vehicle images. After data augmentation (horizontal flipping), number of car images are 17584 and number of non-car images are 17936. 
+To build the model, I first extract features of the input images to feed into the model. The input images are located in the `data` folder (is not included here, due to the limitation for the number of files), which includes series of 8792 vehicle and 8968 non-vehicle images. After data augmentation (horizontal flipping), number of car images are 17584 and number of non-vehicles images are 17936. 
 
 These steps are done through `extract_features` function, which is defined in `functTrain.py`. After I build a linear SVM model, I save the model for the later use. This pipeline is coded in `model.py`.
 
@@ -77,7 +77,7 @@ The shortlisted windows in one of the test images is shown bellow:
 
 To remove the false positive windows, I performed several steps. 
 
-First, I did hard negative mining; meaning that I added some of false positive windows of the video frames to the non-car dataset. 
+First, I did hard negative mining; meaning that I added some of false positive windows of the video frames to the non-vehicles dataset. 
 
 `hardAugNonCar   = glob.glob('../data/nonV_from_video/*')`
 
