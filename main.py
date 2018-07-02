@@ -6,6 +6,7 @@ import pickle
 import cv2
 from functDetect import *
 import os
+import collections
 
 class find_cars():
     def __init__(self, clf, scaler, properties):
@@ -22,60 +23,51 @@ class find_cars():
         self.hist_feat      = properties['hist_feat']  # Histogram features on or off
         self.hog_feat       = properties['hog_feat'] # HOG features on or off
         self.hist_range     = properties['hist_range'] 
-        self.scale          = properties['scale']
-        self.firstFrame     = True
-        self.lastFrameWindows= []
+        self.lastNFramesWins= collections.deque()
 
     def __call__(self, img):
-        found_windows       = []
-        currentFrameWindows = []
+        windows = []
 
         for n in [60, 80, 100, 120, 140, 160, 180, 200]:
             window_size = (n, n)
-            ystart = int(img.shape[0]/2 + 20)
-            ystop  = int(img.shape[0]-30)
-            xstart = 0
+            ystart = int(img.shape[0]/2 + 40) 
+            ystop  = int(img.shape[0]-50)
+            xstart = int(img.shape[1]/2+50)
             xstop  = int(img.shape[1])
+            overlap = 0.8 
             # if the size of the window is smaller than (100,100), cut the search area
             if n<100:
-                ystop = ystop - 210
-                xstart = 250
+                ystop = int(ystop - 200)
                 xstop  = int(img.shape[1] - 250)
-
+            if n>120:
+                overlap = 0.9 
             # scan the area for any possible window
-            windows = slide_window(img, x_start_stop=[xstart, xstop], y_start_stop=[ystart, ystop],
-                    xy_window=window_size, xy_overlap=(0.8, 0.8))
-            
+            windows.append(slide_window(img, x_start_stop=[xstart, xstop], y_start_stop=[ystart, ystop],
+                    xy_window=window_size, xy_overlap=(overlap, overlap)))
             # search whether there is any vehicle in the window
-            currentFrameWindows.append(search_windows(img, windows, self.clf, self.scaler, 
-                self.color_space, self.spatial_size, 
-                self.hist_bins, self.hist_range, self.orient, self.pix_per_cell, self.cell_per_block, 
-                self.hog_channel, self.spatial_feat, self.hist_feat, self.hog_feat))
-
-        if self.firstFrame:
-            found_windows = currentFrameWindows
-            self.lastFrameWindows = currentFrameWindows
-            self.firstFrame = False
-            threshold = 6
+        currentFrameWindows = search_windows(img, windows, self.clf, self.scaler,
+                self.color_space, self.spatial_size,
+                self.hist_bins, self.hist_range, self.orient, self.pix_per_cell, self.cell_per_block,
+                self.hog_channel, self.spatial_feat, self.hist_feat, self.hog_feat)
+        threshold = 27
+        if len(self.lastNFramesWins)<22:
+            threshold = 3#20
         else:
-            found_windows = currentFrameWindows + self.lastFrameWindows
-            self.lastFrameWindows = currentFrameWindows
-            threshold = 14
-
-        img1 = np.copy(img)
-        ##img1 = draw_boxes(img1, found_windows, color=(0, 0, 255), thick=6)
-        ##plt.imshow(img1)
-        ##plt.savefig('test21_annot.jpg')
+            del self.lastNFramesWins[0]
+        self.lastNFramesWins.append(currentFrameWindows)
+        #img1 = np.copy(img)
+        #img1 = draw_boxes(img1, self.lastNFramesWins, color=(0, 0, 255), thick=6)
+        #plt.imshow(img1)
+        #plt.savefig('test5_annot.jpg')
         # heatmapping to remove the false positives
         heatmap = np.zeros_like(img)
-        heatmap, labels = heatmapped(heatmap, found_windows, threshold=threshold)
+        heatmap, labels = heatmapped(heatmap, self.lastNFramesWins, threshold=threshold)
         #draw boxes arund the hot areas
         boxed_image =draw_labeled_bboxes(img, labels)
-        ##plt.imshow(boxed_image)
-        ##plt.savefig('test22_annot.jpg')
+
         return boxed_image
 
-    
+
 #******************************************************************
 # load a pe-trained svc model from a serialized (pickle) file
 clf = pickle.load( open("model/svm_model.pkl", "rb" ) )
@@ -90,7 +82,7 @@ process_video  = True
 #########test images##############
 if process_images:
     #Load the test images
-    testImgFiles = glob.glob('./test_images/test1.jpg')
+    testImgFiles = glob.glob('./test_images/test5.jpg')
     #If the output directory doesn't exist, create one
     try:
         os.stat("outputImages")
@@ -112,11 +104,8 @@ if process_video:
         os.mkdir("outputvideo")
 
     outputVideo = './outputVideo/project_video_annotated.mp4'
-
     clip1 = VideoFileClip("./project_video.mp4")
     clipImgs = clip1.fl_image(car_detected) #This function expects color images!!
     clipImgs.write_videofile(outputVideo, audio=False)
-    #clip = clipImgs.subclip(30,33)
-    #clip.write_videofile(outputVideo, audio=False)
-
-
+    #clip = clipImgs.subclip(0, 20)
+    #clip.write_videofile(outputVideo, audio=False)    
